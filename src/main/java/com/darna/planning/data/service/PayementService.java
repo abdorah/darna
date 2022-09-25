@@ -1,6 +1,6 @@
 package com.darna.planning.data.service;
 
-import com.darna.planning.data.entity.SamplePerson;
+import com.darna.planning.data.entity.Payement;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,20 +9,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SamplePersonService {
+public class PayementService {
 
-    private final SamplePersonRepository repository;
+    private final PayementRepository repository;
 
     @Autowired
-    public SamplePersonService(SamplePersonRepository repository) {
+    public PayementService(PayementRepository repository) {
         this.repository = repository;
     }
 
-    public Optional<SamplePerson> get(UUID id) {
+    public Optional<Payement> get(UUID id) {
         return repository.findById(id);
     }
 
-    public SamplePerson update(SamplePerson entity) {
+    public Payement update(Payement entity) {
         return repository.save(entity);
     }
 
@@ -30,7 +30,7 @@ public class SamplePersonService {
         repository.deleteById(id);
     }
 
-    public Page<SamplePerson> list(Pageable pageable) {
+    public Page<Payement> list(Pageable pageable) {
         return repository.findAll(pageable);
     }
 

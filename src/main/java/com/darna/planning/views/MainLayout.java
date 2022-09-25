@@ -3,7 +3,6 @@ package com.darna.planning.views;
 import com.darna.planning.data.entity.User;
 import com.darna.planning.security.AuthenticatedUser;
 import com.darna.planning.views.about.AboutView;
-import com.darna.planning.views.details.DetailsView;
 import com.darna.planning.views.edit.EditView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -152,8 +151,6 @@ public class MainLayout extends AppLayout {
                 new MenuItemInfo("About", "la la-info-circle", AboutView.class), //
 
                 new MenuItemInfo("Edit", "la la-map-signs", EditView.class), //
-
-                new MenuItemInfo("Details", "la la-chalkboard", DetailsView.class), //
 
         };
     }

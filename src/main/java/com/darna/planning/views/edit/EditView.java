@@ -1,7 +1,7 @@
 package com.darna.planning.views.edit;
 
-import com.darna.planning.data.entity.SamplePerson;
-import com.darna.planning.data.service.SamplePersonService;
+import com.darna.planning.data.entity.Payement;
+import com.darna.planning.data.service.PayementService;
 import com.darna.planning.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -34,36 +34,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 @PageTitle("Edit")
-@Route(value = "edit/:samplePersonID?/:action?(edit)", layout = MainLayout.class)
+@Route(value = "edit/:payementID?/:action?(edit)", layout = MainLayout.class)
 @PermitAll
 @Uses(Icon.class)
 public class EditView extends Div implements BeforeEnterObserver {
 
-    private final String SAMPLEPERSON_ID = "samplePersonID";
-    private final String SAMPLEPERSON_EDIT_ROUTE_TEMPLATE = "edit/%s/edit";
+    private final String PAYEMENT_ID = "payementID";
+    private final String PAYEMENT_EDIT_ROUTE_TEMPLATE = "edit/%s/edit";
 
-    private Grid<SamplePerson> grid = new Grid<>(SamplePerson.class, false);
+    private Grid<Payement> grid = new Grid<>(Payement.class, false);
 
-    private TextField firstName;
-    private TextField lastName;
-    private TextField email;
-    private TextField phone;
-    private DatePicker dateOfBirth;
-    private TextField occupation;
-    private Checkbox important;
+    private TextField source;
+    private TextField target;
+    private TextField amount;
+    private TextField goal;
+    private DatePicker date;
+    private TextField remaining;
+    private Checkbox reached;
 
-    private Button cancel = new Button("Cancel");
-    private Button save = new Button("Save");
+    private Button cancel = new Button("Annuler");
+    private Button save = new Button("Enregistrer");
 
-    private BeanValidationBinder<SamplePerson> binder;
+    private BeanValidationBinder<Payement> binder;
 
-    private SamplePerson samplePerson;
+    private Payement payement;
 
-    private final SamplePersonService samplePersonService;
+    private final PayementService payementService;
 
     @Autowired
-    public EditView(SamplePersonService samplePersonService) {
-        this.samplePersonService = samplePersonService;
+    public EditView(PayementService payementService) {
+        this.payementService = payementService;
         addClassNames("edit-view");
 
         // Create UI
@@ -75,22 +75,22 @@ public class EditView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("firstName").setAutoWidth(true);
-        grid.addColumn("lastName").setAutoWidth(true);
-        grid.addColumn("email").setAutoWidth(true);
-        grid.addColumn("phone").setAutoWidth(true);
-        grid.addColumn("dateOfBirth").setAutoWidth(true);
-        grid.addColumn("occupation").setAutoWidth(true);
-        LitRenderer<SamplePerson> importantRenderer = LitRenderer.<SamplePerson>of(
+        grid.addColumn("source").setAutoWidth(true);
+        grid.addColumn("target").setAutoWidth(true);
+        grid.addColumn("amount").setAutoWidth(true);
+        grid.addColumn("goal").setAutoWidth(true);
+        grid.addColumn("date").setAutoWidth(true);
+        grid.addColumn("remaining").setAutoWidth(true);
+        LitRenderer<Payement> reachedRenderer = LitRenderer.<Payement>of(
                 "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
-                .withProperty("icon", important -> important.isImportant() ? "check" : "minus").withProperty("color",
-                        important -> important.isImportant()
+                .withProperty("icon", reached -> reached.isReached() ? "check" : "minus").withProperty("color",
+                        reached -> reached.isReached()
                                 ? "var(--lumo-primary-text-color)"
                                 : "var(--lumo-disabled-text-color)");
 
-        grid.addColumn(importantRenderer).setHeader("Important").setAutoWidth(true);
+        grid.addColumn(reachedRenderer).setHeader("reached").setAutoWidth(true);
 
-        grid.setItems(query -> samplePersonService.list(
+        grid.setItems(query -> payementService.list(
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
                 .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
@@ -98,7 +98,7 @@ public class EditView extends Div implements BeforeEnterObserver {
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(SAMPLEPERSON_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate(String.format(PAYEMENT_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate(EditView.class);
@@ -106,7 +106,7 @@ public class EditView extends Div implements BeforeEnterObserver {
         });
 
         // Configure Form
-        binder = new BeanValidationBinder<>(SamplePerson.class);
+        binder = new BeanValidationBinder<>(Payement.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
 
@@ -119,17 +119,17 @@ public class EditView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.samplePerson == null) {
-                    this.samplePerson = new SamplePerson();
+                if (this.payement == null) {
+                    this.payement = new Payement();
                 }
-                binder.writeBean(this.samplePerson);
-                samplePersonService.update(this.samplePerson);
+                binder.writeBean(this.payement);
+                payementService.update(this.payement);
                 clearForm();
                 refreshGrid();
-                Notification.show("SamplePerson details stored.");
+                Notification.show("Payement bien effectué.");
                 UI.getCurrent().navigate(EditView.class);
             } catch (ValidationException validationException) {
-                Notification.show("An exception happened while trying to store the samplePerson details.");
+                Notification.show("An exception happened while trying to store the payement details.");
             }
         });
 
@@ -137,14 +137,14 @@ public class EditView extends Div implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<UUID> samplePersonId = event.getRouteParameters().get(SAMPLEPERSON_ID).map(UUID::fromString);
-        if (samplePersonId.isPresent()) {
-            Optional<SamplePerson> samplePersonFromBackend = samplePersonService.get(samplePersonId.get());
-            if (samplePersonFromBackend.isPresent()) {
-                populateForm(samplePersonFromBackend.get());
+        Optional<UUID> payementId = event.getRouteParameters().get(PAYEMENT_ID).map(UUID::fromString);
+        if (payementId.isPresent()) {
+            Optional<Payement> payementFromBackend = payementService.get(payementId.get());
+            if (payementFromBackend.isPresent()) {
+                populateForm(payementFromBackend.get());
             } else {
                 Notification.show(
-                        String.format("The requested samplePerson was not found, ID = %s", samplePersonId.get()), 3000,
+                        String.format("Le payement demandé n'est pas trouvé, ID = %s", payementId.get()), 3000,
                         Notification.Position.BOTTOM_START);
                 // when a row is selected but the data is no longer available,
                 // refresh grid
@@ -163,14 +163,14 @@ public class EditView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        firstName = new TextField("First Name");
-        lastName = new TextField("Last Name");
-        email = new TextField("Email");
-        phone = new TextField("Phone");
-        dateOfBirth = new DatePicker("Date Of Birth");
-        occupation = new TextField("Occupation");
-        important = new Checkbox("Important");
-        Component[] fields = new Component[]{firstName, lastName, email, phone, dateOfBirth, occupation, important};
+        source = new TextField("Source");
+        target = new TextField("Cible");
+        amount = new TextField("Montant");
+        goal = new TextField("Objectif");
+        date = new DatePicker("Date de payement");
+        remaining = new TextField("Le reste du totale");
+        reached = new Checkbox("Abouti");
+        Component[] fields = new Component[]{source, target, amount, goal, date, remaining, reached};
 
         formLayout.add(fields);
         editorDiv.add(formLayout);
@@ -204,9 +204,8 @@ public class EditView extends Div implements BeforeEnterObserver {
         populateForm(null);
     }
 
-    private void populateForm(SamplePerson value) {
-        this.samplePerson = value;
-        binder.readBean(this.samplePerson);
-
+    private void populateForm(Payement value) {
+        this.payement = value;
+        binder.readBean(this.payement);
     }
 }
