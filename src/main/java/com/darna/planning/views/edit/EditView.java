@@ -75,12 +75,12 @@ public class EditView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("source").setAutoWidth(true);
-        grid.addColumn("target").setAutoWidth(true);
-        grid.addColumn("amount").setAutoWidth(true);
-        grid.addColumn("goal").setAutoWidth(true);
-        grid.addColumn("date").setAutoWidth(true);
-        grid.addColumn("remaining").setAutoWidth(true);
+        grid.addColumn("source").setHeader("Source").setAutoWidth(true);
+        grid.addColumn("target").setHeader("Cible").setAutoWidth(true);
+        grid.addColumn("amount").setHeader("Montant").setAutoWidth(true);
+        grid.addColumn("goal").setHeader("Objectif").setAutoWidth(true);
+        grid.addColumn("date").setHeader("Date de payement").setAutoWidth(true);
+        grid.addColumn("remaining").setHeader("Le reste du totale").setAutoWidth(true);
         LitRenderer<Payement> reachedRenderer = LitRenderer.<Payement>of(
                 "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
                 .withProperty("icon", reached -> reached.isReached() ? "check" : "minus").withProperty("color",
@@ -88,7 +88,7 @@ public class EditView extends Div implements BeforeEnterObserver {
                                 ? "var(--lumo-primary-text-color)"
                                 : "var(--lumo-disabled-text-color)");
 
-        grid.addColumn(reachedRenderer).setHeader("reached").setAutoWidth(true);
+        grid.addColumn(reachedRenderer).setHeader("Abouti").setAutoWidth(true);
 
         grid.setItems(query -> payementService.list(
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
@@ -170,7 +170,7 @@ public class EditView extends Div implements BeforeEnterObserver {
         date = new DatePicker("Date de payement");
         remaining = new TextField("Le reste du totale");
         reached = new Checkbox("Abouti");
-        Component[] fields = new Component[]{source, target, amount, goal, date, remaining, reached};
+        Component[] fields = new Component[] { source, target, amount, goal, date, remaining, reached };
 
         formLayout.add(fields);
         editorDiv.add(formLayout);
@@ -207,5 +207,6 @@ public class EditView extends Div implements BeforeEnterObserver {
     private void populateForm(Payement value) {
         this.payement = value;
         binder.readBean(this.payement);
+
     }
 }
